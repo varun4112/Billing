@@ -1,0 +1,75 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE/billing-backend
+  APP_PORT: 3000
+
+# DEVELOPMENT
+
+build_dev:
+  stage: build
+  tags:
+    - billing-runner
+  variables:
+    DOCKER_IMAGE_TAG: develop
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - docker build -t $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG .
+    - docker push $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
+  only:
+    - develop
+
+deploy_dev:
+  stage: deploy
+  tags:
+    - billing-runner
+  variables:
+    DOCKER_IMAGE_TAG: develop
+    CONTAINER_NAME: billing-backend-dev
+    CONTAINER_PORT: 4001
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - docker pull $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
+    - docker stop $CONTAINER_NAME || true
+    - docker rm $CONTAINER_NAME || true
+    - docker run -d --name $CONTAINER_NAME -p $CONTAINER_PORT:$APP_PORT --env-file .env.development --restart always $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
+  only:
+    - develop
+
+# PRODUCTION
+
+build_prod:
+  stage: build
+  tags:
+    - billing-runner
+  variables:
+    DOCKER_IMAGE_TAG: production
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - docker build -t $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG .
+    - docker push $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
+  only:
+    - production
+
+deploy_prod:
+  stage: deploy
+  tags:
+    - billing-runner
+  variables:
+    DOCKER_IMAGE_TAG: production
+    CONTAINER_NAME: billing-backend-prod
+    CONTAINER_PORT: 5001
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - docker pull $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
+    - docker stop $CONTAINER_NAME || true
+    - docker rm $CONTAINER_NAME || true
+    - docker run -d --name $CONTAINER_NAME -p $CONTAINER_PORT:$APP_PORT --env-file .env.production --restart always $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
+  only:
+    - production
