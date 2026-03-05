@@ -14,4 +14,35 @@ datasource db {
   provider = "postgresql"
 }
 
+model Tenant{
+  id        Int @id @default(autoincrement())
+  name      String
+  isActive  Boolean @default(false)
+  createdAt DateTime @default(now())
 
+  users     Users[]
+  customers Customers[]
+}
+
+model Users{
+  id        Int @id @default(autoincrement())
+  tenantId  Int
+  name      String
+  email     String @unique
+  password  String
+  role      String
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+}
+
+model Customers {
+  id        Int      @id @default(autoincrement())
+  tenantId  Int
+  name      String
+  phone     String?
+  email     String?
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+}
