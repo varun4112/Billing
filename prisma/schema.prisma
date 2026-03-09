@@ -39,7 +39,7 @@ model Users{
 model Customers {
   id        Int      @id @default(autoincrement())
   tenantId  Int
-  name      String
+  name      String  @unique
   phone     String?
   email     String?
   createdAt DateTime @default(now())

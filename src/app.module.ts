@@ -10,6 +10,8 @@ import { UsersService } from './users/users.service';
 import { UsersController } from './users/users.controller';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
+import { TenantsController } from './tenants/tenants.controller';
+import { TenantsService } from './tenants/tenants.service';
 
 @Module({
   imports: [
@@ -22,7 +24,7 @@ import { PrismaModule } from './prisma/prisma.module';
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV}`,
     }), PrismaModule,],
-  controllers: [AppController, UsersController],
-  providers: [AppService, UsersService],
+  controllers: [AppController, UsersController, TenantsController],
+  providers: [AppService, UsersService, TenantsService],
 })
 export class AppModule { }
