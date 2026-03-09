@@ -14,5 +14,7 @@ import { JwtStrategy } from 'src/auth/jwt.strategy';
   providers: [TenantsService,JwtStrategy],
   controllers: [TenantsController],
   exports: [JwtModule],
+
+  
 })
 export class TenantsModule {}
